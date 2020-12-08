@@ -1,0 +1,74 @@
+$primary-color: rgb(0, 0, 179);
+$light-color: #ffffff;
+$gray-color: rgb(204, 204, 204);
+$primary-shadow: 0 0 20px 5px rgba($primary-color, 0.4);
+$danger-color: rgb(255, 0, 0);
+
+@mixin box-shadow($color) {
+    box-shadow: 0 0 20px 5px $color;
+}
+
+.App {
+    .button {
+        padding: 17px 25px;
+        background-color: $primary-color;
+        color: $light-color;
+        cursor: pointer;
+        border-radius: 3px;
+        border: none;
+        outline: 0;
+        transition: background-color 150ms ease, box-shadow 150ms ease;
+
+        &:focus {
+            background-color: darken($primary-color, 10%);
+
+            @include box-shadow(rgba($primary-color, 0.4));
+        }
+
+        &:hover {
+            background-color: darken($primary-color, 10%);
+        }
+    }
+}
+
+.input-wrapper {
+    max-width: 400px;
+    width: 100%;
+    margin-right: 20px;
+}
+
+.input {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    outline: 0;
+    border: 2px solid $gray-color;
+    border-radius: 3px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+
+    &:focus:not(&--error) {
+        border-color: $primary-color;
+        box-shadow: $primary-shadow;
+    }
+
+    &--error {
+        border-color: $danger-color;
+
+        @include box-shadow(rgba($danger-color, 0.4));
+    }
+}
+
+.controls {
+    display: flex;
+    margin-top: 48px;
+    align-items: flex-start;
+}
+
+.error {
+    display: inline-block;
+    font-size: 12px;
+    color: $danger-color;
+    margin-top: 4px;
+    font-family: sans-serif;
+}

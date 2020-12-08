@@ -1,142 +1,326 @@
-import { Component, createRef } from 'react';
-import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
-import { PostManagementContainer } from './containers/PostManagementContainer/PostManagementContainer';
-import { PostManagement } from './components/PostManagement/PostManagement';
-import { Text } from './components/Text/Text';
-import { UserCard } from './components/UserCard/UserCard';
-import { AppContext } from './context/AppContext';
-import { Toaster } from './components/Toaster/Toaster';
-import { Modal } from './components/Modal/Modal';
-import { withLogger } from './hoc/withLogger';
-import './App.scss';
+import {
+    useState,
+    // useEffect,
+    useRef,
+    // useContext,
+    useMemo,
+    useCallback,
+    createContext,
+    memo
+} from 'react';
+// import cn from 'classnames';
+import styled, { css } from 'styled-components/macro';
 
-const TextWithLogger = withLogger(Text, logs =>
-    console.log('<Text /> is rendered...', logs)
-);
+import classes from './App.module.scss';
 
-export class App extends Component {
-    // constructor(props) {
-    //     super(props);
+const AppContext = createContext({
+    userName: '',
+    showCounter: true
+});
 
-    //     this.state = {
-    //         posts: DEFAULT_POSTS,
-    //         postsAmount: 3,
-    //         showPosts: true,
-    //         login: '',
-    //         showLogin: false
-    //     };
-    //     console.log(
-    //         '%c[constructor]',
-    //         'color: red; font-weight:bold;'
-    //     );
-    // }
+const Counter = memo(({ numbers, onChangeInput }) => {
+    const [count, setCount] = useState(0);
+    // const { userName, showCounter } = useContext(AppContext);
 
-    inputRef = createRef();
+    console.log(
+        '<Counter /> is rendering...',
+        numbers,
+        onChangeInput
+    );
 
-    // static getDerivedStateFromProps(props, state) {
-    //     console.log(
-    //         '%c[getDerivedStateFromProp]',
-    //         'color: red; font-weight:bold;'
-    //     );
-    //     return null;
-    // }
+    // const renderCountRef = useRef(0); //{ current: 0 }
 
-    componentDidMount() {
-        console.log(
-            '%c[componentDidMount]',
-            'color: red; font-weight:bold;'
-        );
-        // alert('Welcome to our App!');
-    }
+    // console.log('Renders: ', ++renderCountRef.current);
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     console.log('%c[shouldComponentUpdate]', 'color: green; font-weight:bold;');
-    //     // console.log('[nextProps]', nextProps);
-    //     // console.log('[this.props]', this.props);
-    //     // console.log('[nextState]', nextState);
-    //     // console.log('[this.state]', this.state);
+    // useEffect(() => {
+    //     console.log('<Counter /> is ceated...');
 
-    //     if (!nextState.postsAmount) return false;
+    //     return () =>
+    //         console.log('<Counter /> is going to be removed...');
+    // }, []);
 
-    //     return true;
-    // }
+    const handleIncreaseCount = value =>
+        setCount(prevCount => prevCount + value);
 
-    getSnapshotBeforeUpdate(props, state) {
-        console.log(
-            '%c[getSnapshotBeforeUpdate]',
-            'color: green; font-weight:bold;'
-        );
-        // console.log('[props]', props);
-        // console.log('[state]', state);
-        return 'This  is a snapshot';
-    }
+    const handleDecreaseCount = value =>
+        setCount(prevCount => prevCount - value);
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log(
-            '%c[componentDidUpdate]',
-            'color: green; font-weight:bold;'
-        );
-        // console.log('[prevProps]', prevProps);
-        // console.log('[this.props]', this.props);
-        // console.log('[prevState]', prevState);
-        // console.log('[this.state]', this.state);
-        // console.log('[snapshot]', snapshot);
-    }
+    return (
+        <div>
+            <div>{count}</div>
 
-    handleFocusImput = () => {
-        this.inputRef.current.focus();
+            {/* <div>
+                <div>Username: {userName}</div>
+                <div>Show counter: {String(showCounter)}</div>
+            </div> */}
+            <button
+                type="button"
+                onClick={() => handleIncreaseCount(1)}
+            >
+                +1
+            </button>
+
+            <button
+                type="button"
+                onClick={() => handleDecreaseCount(1)}
+            >
+                -1
+            </button>
+
+            <button
+                type="button"
+                onClick={() => handleIncreaseCount(5)}
+            >
+                +5
+            </button>
+
+            <button
+                type="button"
+                onClick={() => handleDecreaseCount(5)}
+            >
+                -5
+            </button>
+        </div>
+    );
+});
+
+export const App = () => {
+    const [userName, setUserName] = useState('John Doe');
+    const [showCounter, setShowCounter] = useState(true);
+    const [showError, setShowError] = useState(false);
+    const inputRef = useRef(); // { current: null }
+
+    // console.log('Before useEffect');
+
+    // useEffect(() => {
+    //     console.log('showCounter is Updated!');
+    // }, [showCounter]);
+
+    // useEffect(() => {
+    //     console.log('userName is Updated!');
+    // }, [userName]);
+
+    const numbers = useMemo(() => [1, 2, 3, 4, 5, showCounter], [
+        showCounter
+    ]);
+    // const handleChangeInput = useMemo(
+    //     () => e => setUserName(e.target.value),
+    //     []
+    // );
+
+    const handleChangeInput = useCallback(
+        e => setUserName(e.target.value),
+        []
+    );
+
+    // const handleChangeInput = e => setUserName(e.target.value);
+
+    const handleToggleCounter = () =>
+        setShowCounter(prevState => !prevState);
+
+    const handleFocusInput = () => inputRef.current.focus();
+
+    const handleCreateUser = () => {
+        if (userName) return setShowError(false);
+
+        setShowError(true);
+        inputRef.current.focus();
     };
 
-    // componentDidCatch(error, info) {
-    //     console.log('[error]', error);
-    //     console.log('[info]', info);
-    // }
+    return (
+        <AppContext.Provider value={{ userName, showCounter }}>
+            <div className={classes.App}>
+                <div>
+                    {showCounter && (
+                        <Counter
+                            numbers={numbers}
+                            onChangeInput={handleChangeInput}
+                        />
+                    )}
 
-    render() {
-        console.log('%c[render]', 'color: red; font-weight:bold;');
-
-        return (
-            <ErrorBoundary
-                additionalPage={({ error, onSayHello }) => (
-                    <div className="additional-page">
-                        <h1>Somthing event wrong...</h1>
-                        <p>{error.message}</p>
-
-                        <button type="button" onClick={onSayHello}>
-                            Go back
-                        </button>
-                    </div>
-                )}
-            >
-                <Toaster>
-                    <AppContext.Provider
-                        value={{ url: '/', alt: 'image', rating: 33 }}
+                    <button
+                        type="button"
+                        onClick={handleToggleCounter}
                     >
-                        <div className="app">
-                            <PostManagementContainer
-                                as={PostManagement}
-                                inputRef={this.inputRef}
-                                onFocusInput={this.handleFocusImput}
+                        {showCounter
+                            ? 'Hide counter'
+                            : 'Show counter'}
+                    </button>
+
+                    <button type="button" onClick={handleFocusInput}>
+                        Focus input
+                    </button>
+
+                    <Controls>
+                        <InputWrapper>
+                            <Input
+                                ref={inputRef}
+                                autoComplete="off"
+                                // className={cn('input', {
+                                //     'input--error': showError
+                                // })}
+                                // className={classes.input}
+                                $error={showError}
+                                type="text"
+                                name="userName"
+                                placeholder="User name"
+                                value={userName}
+                                onChange={handleChangeInput}
                             />
-                            <TextWithLogger>
-                                Hello World!
-                            </TextWithLogger>
-                            <UserCard />
-                            <Modal />
-                            {/* <UserCard
-                        userInfoAs={
-                            <UserInfo
-                                avatarAs={
-                                    <Avatar url="/" alt="image" />
-                                }
-                                raiting={23}
-                            />
-                        }
-                    /> */}
-                        </div>
-                    </AppContext.Provider>
-                </Toaster>
-            </ErrorBoundary>
-        );
+
+                            {showError && (
+                                <ErrorMessage>
+                                    User name is required
+                                </ErrorMessage>
+                            )}
+                        </InputWrapper>
+
+                        <Button onClick={handleCreateUser}>
+                            Create user
+                        </Button>
+                    </Controls>
+                </div>
+            </div>
+        </AppContext.Provider>
+    );
+};
+
+const primaryColor = '0, 0, 179';
+const lightColor = '#fff';
+const grayColor = '#ccc';
+const dangerColor = '255, 0, 0';
+
+const boxShadowMixin = (color, opacity) =>
+    `0 0 20px 5px rgba(${color}, ${opacity})`;
+
+const Controls = styled.div`
+    display: flex;
+    margin-top: 48px;
+    align-items: flex-start;
+`;
+
+const applyError = ({ $error }) => {
+    if (!$error) {
+        return css`
+            &:focus {
+                border-color: rgb(${primaryColor});
+                box-shadow: ${boxShadowMixin(primaryColor, 0.4)};
+            }
+        `;
     }
-}
+
+    return css`
+        border: 2px solid rgb(${dangerColor});
+        box-shadow: ${boxShadowMixin(dangerColor, 0.4)};
+    `;
+};
+
+const Input = styled.input`
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    outline: 0;
+    border: 2px solid ${grayColor};
+    border-radius: 3px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+
+    ${applyError}
+`;
+
+const InputWrapper = styled.div`
+    max-width: 400px;
+    width: 100%;
+    margin-right: 20px;
+`;
+
+const ErrorMessage = styled.span`
+    display: inline-block;
+    font-size: 12px;
+    color: rgb(${dangerColor});
+    margin-top: 4px;
+    font-family: sans-serif;
+`;
+
+const Button = styled.button.attrs({
+    type: 'button'
+})`
+    padding: 17px 25px;
+    background-color: rgb(${primaryColor});
+    color: ${lightColor};
+    cursor: pointer;
+    border-radius: 3px;
+    border: none;
+    outline: 0;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+
+    &:focus {
+        box-shadow: ${boxShadowMixin(primaryColor, 0.4)};
+    }
+`;
+// export class App extends Component {
+//     state = {
+//         count: 0
+//     };
+
+//     handleIncreaseCount = value => {
+//         this.setState(prevState => ({
+//             count: prevState.count + value
+//         }));
+//     };
+
+//     handleDecreaseCount = value => {
+//         this.setState(prevState => ({
+//             count: prevState.count - value
+//         }));
+//     };
+
+//     render() {
+//         const { count } = this.state;
+//         return (
+//             <div className="App">
+//                 <div>
+//                     <strong>{count}</strong>
+
+//                     <div>
+//                         <button
+//                             type="button"
+//                             onClick={() =>
+//                                 this.handleIncreaseCount(1)
+//                             }
+//                         >
+//                             +1
+//                         </button>
+
+//                         <button
+//                             type="button"
+//                             onClick={() =>
+//                                 this.handleDecreaseCount(1)
+//                             }
+//                         >
+//                             -1
+//                         </button>
+
+//                         <button
+//                             type="button"
+//                             onClick={() =>
+//                                 this.handleIncreaseCount(5)
+//                             }
+//                         >
+//                             +5
+//                         </button>
+
+//                         <button
+//                             type="button"
+//                             onClick={() =>
+//                                 this.handleDecreaseCount(5)
+//                             }
+//                         >
+//                             -5
+//                         </button>
+//                     </div>
+//                 </div>
+//             </div>
+//         );
+//     }
+// }
